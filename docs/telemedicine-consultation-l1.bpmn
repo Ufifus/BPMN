@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+  id="Definitions_TelemedicineConsultationL1"
+  targetNamespace="https://example.org/bpmn/telemedicine-consultation-l1"
+  exporter="Cursor"
+  exporterVersion="1.0">
+  <bpmn:collaboration id="Collaboration_TelemedicineConsultationL1">
+    <bpmn:participant id="Participant_MIS" name="МИС: модуль телемедицинских консультаций" processRef="Process_TelemedicineConsultationL1" />
+  </bpmn:collaboration>
+
+  <bpmn:process id="Process_TelemedicineConsultationL1" name="L1. Архитектура модуля телемедицинских консультаций для МИС" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_TelemedicineConsultationL1">
+      <bpmn:lane id="Lane_Patient" name="Пациент / личный кабинет">
+        <bpmn:flowNodeRef>StartEvent_RequestConsultation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SubmitRequest</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SelectSlot</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ReceiveConclusion</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_ConclusionAvailable</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_TelemedicineModule" name="Модуль телемедицины МИС">
+        <bpmn:flowNodeRef>ServiceTask_ValidateRequest</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_RequestAccepted</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ServiceTask_CreateCase</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_PrepareSessionFork</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ServiceTask_SendNotifications</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_PrepareSessionJoin</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>IntermediateCatchEvent_ConsultationTime</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ServiceTask_CloseCase</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_InformRejection</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_RequestRejected</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Doctor" name="Врач / АРМ врача">
+        <bpmn:flowNodeRef>UserTask_ConductConsultation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>UserTask_DocumentConclusion</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Integrations" name="Интеграции МИС и внешние сервисы">
+        <bpmn:flowNodeRef>ServiceTask_UpdateScheduleAndEHR</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ServiceTask_ReserveVideoRoom</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_PublishResultsFork</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ServiceTask_SaveProtocolToEHR</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ServiceTask_SendConclusion</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_PublishResultsJoin</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+
+    <bpmn:startEvent id="StartEvent_RequestConsultation" name="Пациент инициирует консультацию">
+      <bpmn:outgoing>Flow_Start_To_SubmitRequest</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:userTask id="Task_SubmitRequest" name="Подать заявку, выбрать профиль помощи и дать согласия">
+      <bpmn:incoming>Flow_Start_To_SubmitRequest</bpmn:incoming>
+      <bpmn:outgoing>Flow_SubmitRequest_To_ValidateRequest</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:serviceTask id="ServiceTask_ValidateRequest" name="Проверить пациента, согласия, право на услугу и оплату">
+      <bpmn:incoming>Flow_SubmitRequest_To_ValidateRequest</bpmn:incoming>
+      <bpmn:outgoing>Flow_ValidateRequest_To_RequestAccepted</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:exclusiveGateway id="Gateway_RequestAccepted" name="Заявка допустима?">
+      <bpmn:incoming>Flow_ValidateRequest_To_RequestAccepted</bpmn:incoming>
+      <bpmn:outgoing>Flow_RequestAccepted_To_SelectSlot</bpmn:outgoing>
+      <bpmn:outgoing>Flow_RequestRejected_To_InformRejection</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:userTask id="Task_SelectSlot" name="Выбрать врача и слот консультации">
+      <bpmn:incoming>Flow_RequestAccepted_To_SelectSlot</bpmn:incoming>
+      <bpmn:outgoing>Flow_SelectSlot_To_CreateCase</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:serviceTask id="ServiceTask_CreateCase" name="Создать телемедицинский случай и запись на прием">
+      <bpmn:incoming>Flow_SelectSlot_To_CreateCase</bpmn:incoming>
+      <bpmn:outgoing>Flow_CreateCase_To_PrepareSessionFork</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:parallelGateway id="Gateway_PrepareSessionFork" name="Подготовка сеанса">
+      <bpmn:incoming>Flow_CreateCase_To_PrepareSessionFork</bpmn:incoming>
+      <bpmn:outgoing>Flow_PrepareFork_To_Notifications</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PrepareFork_To_UpdateScheduleAndEHR</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PrepareFork_To_ReserveVideoRoom</bpmn:outgoing>
+    </bpmn:parallelGateway>
+
+    <bpmn:serviceTask id="ServiceTask_SendNotifications" name="Отправить приглашения и напоминания пациенту и врачу">
+      <bpmn:incoming>Flow_PrepareFork_To_Notifications</bpmn:incoming>
+      <bpmn:outgoing>Flow_Notifications_To_PrepareJoin</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:serviceTask id="ServiceTask_UpdateScheduleAndEHR" name="Обновить расписание, ЭМК и регистратуру">
+      <bpmn:incoming>Flow_PrepareFork_To_UpdateScheduleAndEHR</bpmn:incoming>
+      <bpmn:outgoing>Flow_UpdateScheduleAndEHR_To_PrepareJoin</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:serviceTask id="ServiceTask_ReserveVideoRoom" name="Зарезервировать видеокомнату и ссылку доступа">
+      <bpmn:incoming>Flow_PrepareFork_To_ReserveVideoRoom</bpmn:incoming>
+      <bpmn:outgoing>Flow_ReserveVideoRoom_To_PrepareJoin</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:parallelGateway id="Gateway_PrepareSessionJoin">
+      <bpmn:incoming>Flow_Notifications_To_PrepareJoin</bpmn:incoming>
+      <bpmn:incoming>Flow_UpdateScheduleAndEHR_To_PrepareJoin</bpmn:incoming>
+      <bpmn:incoming>Flow_ReserveVideoRoom_To_PrepareJoin</bpmn:incoming>
+      <bpmn:outgoing>Flow_PrepareJoin_To_ConsultationTime</bpmn:outgoing>
+    </bpmn:parallelGateway>
+
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent_ConsultationTime" name="Наступило время консультации">
+      <bpmn:incoming>Flow_PrepareJoin_To_ConsultationTime</bpmn:incoming>
+      <bpmn:outgoing>Flow_ConsultationTime_To_ConductConsultation</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_ConsultationTime" />
+    </bpmn:intermediateCatchEvent>
+
+    <bpmn:userTask id="UserTask_ConductConsultation" name="Провести видеоконсультацию и собрать анамнез">
+      <bpmn:incoming>Flow_ConsultationTime_To_ConductConsultation</bpmn:incoming>
+      <bpmn:outgoing>Flow_ConductConsultation_To_DocumentConclusion</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:userTask id="UserTask_DocumentConclusion" name="Оформить заключение, назначения и рекомендации">
+      <bpmn:incoming>Flow_ConductConsultation_To_DocumentConclusion</bpmn:incoming>
+      <bpmn:outgoing>Flow_DocumentConclusion_To_PublishResultsFork</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:parallelGateway id="Gateway_PublishResultsFork" name="Публикация результатов">
+      <bpmn:incoming>Flow_DocumentConclusion_To_PublishResultsFork</bpmn:incoming>
+      <bpmn:outgoing>Flow_PublishFork_To_SaveProtocolToEHR</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PublishFork_To_SendConclusion</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PublishFork_To_CloseCase</bpmn:outgoing>
+    </bpmn:parallelGateway>
+
+    <bpmn:serviceTask id="ServiceTask_SaveProtocolToEHR" name="Сохранить протокол и меддокументы в ЭМК">
+      <bpmn:incoming>Flow_PublishFork_To_SaveProtocolToEHR</bpmn:incoming>
+      <bpmn:outgoing>Flow_SaveProtocolToEHR_To_PublishJoin</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:serviceTask id="ServiceTask_SendConclusion" name="Передать заключение в личный кабинет и уведомить пациента">
+      <bpmn:incoming>Flow_PublishFork_To_SendConclusion</bpmn:incoming>
+      <bpmn:outgoing>Flow_SendConclusion_To_PublishJoin</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:serviceTask id="ServiceTask_CloseCase" name="Закрыть случай, обновить статус оплаты/ОМС и аудит">
+      <bpmn:incoming>Flow_PublishFork_To_CloseCase</bpmn:incoming>
+      <bpmn:outgoing>Flow_CloseCase_To_PublishJoin</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:parallelGateway id="Gateway_PublishResultsJoin">
+      <bpmn:incoming>Flow_SaveProtocolToEHR_To_PublishJoin</bpmn:incoming>
+      <bpmn:incoming>Flow_SendConclusion_To_PublishJoin</bpmn:incoming>
+      <bpmn:incoming>Flow_CloseCase_To_PublishJoin</bpmn:incoming>
+      <bpmn:outgoing>Flow_PublishJoin_To_ReceiveConclusion</bpmn:outgoing>
+    </bpmn:parallelGateway>
+
+    <bpmn:userTask id="Task_ReceiveConclusion" name="Получить заключение и материалы консультации">
+      <bpmn:incoming>Flow_PublishJoin_To_ReceiveConclusion</bpmn:incoming>
+      <bpmn:outgoing>Flow_ReceiveConclusion_To_End</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:endEvent id="EndEvent_ConclusionAvailable" name="Консультация завершена">
+      <bpmn:incoming>Flow_ReceiveConclusion_To_End</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sendTask id="Task_InformRejection" name="Сообщить причину отказа или предложить очный прием">
+      <bpmn:incoming>Flow_RequestRejected_To_InformRejection</bpmn:incoming>
+      <bpmn:outgoing>Flow_InformRejection_To_RequestRejectedEnd</bpmn:outgoing>
+    </bpmn:sendTask>
+
+    <bpmn:endEvent id="EndEvent_RequestRejected" name="Заявка отклонена">
+      <bpmn:incoming>Flow_InformRejection_To_RequestRejectedEnd</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_Start_To_SubmitRequest" sourceRef="StartEvent_RequestConsultation" targetRef="Task_SubmitRequest" />
+    <bpmn:sequenceFlow id="Flow_SubmitRequest_To_ValidateRequest" sourceRef="Task_SubmitRequest" targetRef="ServiceTask_ValidateRequest" />
+    <bpmn:sequenceFlow id="Flow_ValidateRequest_To_RequestAccepted" sourceRef="ServiceTask_ValidateRequest" targetRef="Gateway_RequestAccepted" />
+    <bpmn:sequenceFlow id="Flow_RequestAccepted_To_SelectSlot" name="Да" sourceRef="Gateway_RequestAccepted" targetRef="Task_SelectSlot" />
+    <bpmn:sequenceFlow id="Flow_RequestRejected_To_InformRejection" name="Нет" sourceRef="Gateway_RequestAccepted" targetRef="Task_InformRejection" />
+    <bpmn:sequenceFlow id="Flow_SelectSlot_To_CreateCase" sourceRef="Task_SelectSlot" targetRef="ServiceTask_CreateCase" />
+    <bpmn:sequenceFlow id="Flow_CreateCase_To_PrepareSessionFork" sourceRef="ServiceTask_CreateCase" targetRef="Gateway_PrepareSessionFork" />
+    <bpmn:sequenceFlow id="Flow_PrepareFork_To_Notifications" sourceRef="Gateway_PrepareSessionFork" targetRef="ServiceTask_SendNotifications" />
+    <bpmn:sequenceFlow id="Flow_PrepareFork_To_UpdateScheduleAndEHR" sourceRef="Gateway_PrepareSessionFork" targetRef="ServiceTask_UpdateScheduleAndEHR" />
+    <bpmn:sequenceFlow id="Flow_PrepareFork_To_ReserveVideoRoom" sourceRef="Gateway_PrepareSessionFork" targetRef="ServiceTask_ReserveVideoRoom" />
+    <bpmn:sequenceFlow id="Flow_Notifications_To_PrepareJoin" sourceRef="ServiceTask_SendNotifications" targetRef="Gateway_PrepareSessionJoin" />
+    <bpmn:sequenceFlow id="Flow_UpdateScheduleAndEHR_To_PrepareJoin" sourceRef="ServiceTask_UpdateScheduleAndEHR" targetRef="Gateway_PrepareSessionJoin" />
+    <bpmn:sequenceFlow id="Flow_ReserveVideoRoom_To_PrepareJoin" sourceRef="ServiceTask_ReserveVideoRoom" targetRef="Gateway_PrepareSessionJoin" />
+    <bpmn:sequenceFlow id="Flow_PrepareJoin_To_ConsultationTime" sourceRef="Gateway_PrepareSessionJoin" targetRef="IntermediateCatchEvent_ConsultationTime" />
+    <bpmn:sequenceFlow id="Flow_ConsultationTime_To_ConductConsultation" sourceRef="IntermediateCatchEvent_ConsultationTime" targetRef="UserTask_ConductConsultation" />
+    <bpmn:sequenceFlow id="Flow_ConductConsultation_To_DocumentConclusion" sourceRef="UserTask_ConductConsultation" targetRef="UserTask_DocumentConclusion" />
+    <bpmn:sequenceFlow id="Flow_DocumentConclusion_To_PublishResultsFork" sourceRef="UserTask_DocumentConclusion" targetRef="Gateway_PublishResultsFork" />
+    <bpmn:sequenceFlow id="Flow_PublishFork_To_SaveProtocolToEHR" sourceRef="Gateway_PublishResultsFork" targetRef="ServiceTask_SaveProtocolToEHR" />
+    <bpmn:sequenceFlow id="Flow_PublishFork_To_SendConclusion" sourceRef="Gateway_PublishResultsFork" targetRef="ServiceTask_SendConclusion" />
+    <bpmn:sequenceFlow id="Flow_PublishFork_To_CloseCase" sourceRef="Gateway_PublishResultsFork" targetRef="ServiceTask_CloseCase" />
+    <bpmn:sequenceFlow id="Flow_SaveProtocolToEHR_To_PublishJoin" sourceRef="ServiceTask_SaveProtocolToEHR" targetRef="Gateway_PublishResultsJoin" />
+    <bpmn:sequenceFlow id="Flow_SendConclusion_To_PublishJoin" sourceRef="ServiceTask_SendConclusion" targetRef="Gateway_PublishResultsJoin" />
+    <bpmn:sequenceFlow id="Flow_CloseCase_To_PublishJoin" sourceRef="ServiceTask_CloseCase" targetRef="Gateway_PublishResultsJoin" />
+    <bpmn:sequenceFlow id="Flow_PublishJoin_To_ReceiveConclusion" sourceRef="Gateway_PublishResultsJoin" targetRef="Task_ReceiveConclusion" />
+    <bpmn:sequenceFlow id="Flow_ReceiveConclusion_To_End" sourceRef="Task_ReceiveConclusion" targetRef="EndEvent_ConclusionAvailable" />
+    <bpmn:sequenceFlow id="Flow_InformRejection_To_RequestRejectedEnd" sourceRef="Task_InformRejection" targetRef="EndEvent_RequestRejected" />
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_TelemedicineConsultationL1">
+    <bpmndi:BPMNPlane id="BPMNPlane_TelemedicineConsultationL1" bpmnElement="Collaboration_TelemedicineConsultationL1">
+      <bpmndi:BPMNShape id="Participant_MIS_di" bpmnElement="Participant_MIS" isHorizontal="true">
+        <dc:Bounds x="120" y="80" width="2940" height="820" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Patient_di" bpmnElement="Lane_Patient" isHorizontal="true">
+        <dc:Bounds x="150" y="80" width="2910" height="180" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_TelemedicineModule_di" bpmnElement="Lane_TelemedicineModule" isHorizontal="true">
+        <dc:Bounds x="150" y="260" width="2910" height="220" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Doctor_di" bpmnElement="Lane_Doctor" isHorizontal="true">
+        <dc:Bounds x="150" y="480" width="2910" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Integrations_di" bpmnElement="Lane_Integrations" isHorizontal="true">
+        <dc:Bounds x="150" y="630" width="2910" height="270" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="StartEvent_RequestConsultation_di" bpmnElement="StartEvent_RequestConsultation">
+        <dc:Bounds x="205" y="152" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SubmitRequest_di" bpmnElement="Task_SubmitRequest">
+        <dc:Bounds x="280" y="130" width="170" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_ValidateRequest_di" bpmnElement="ServiceTask_ValidateRequest">
+        <dc:Bounds x="500" y="330" width="190" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_RequestAccepted_di" bpmnElement="Gateway_RequestAccepted" isMarkerVisible="true">
+        <dc:Bounds x="740" y="345" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SelectSlot_di" bpmnElement="Task_SelectSlot">
+        <dc:Bounds x="850" y="130" width="170" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_CreateCase_di" bpmnElement="ServiceTask_CreateCase">
+        <dc:Bounds x="1080" y="330" width="190" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_PrepareSessionFork_di" bpmnElement="Gateway_PrepareSessionFork">
+        <dc:Bounds x="1320" y="345" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_SendNotifications_di" bpmnElement="ServiceTask_SendNotifications">
+        <dc:Bounds x="1420" y="330" width="190" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_UpdateScheduleAndEHR_di" bpmnElement="ServiceTask_UpdateScheduleAndEHR">
+        <dc:Bounds x="1420" y="650" width="190" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_ReserveVideoRoom_di" bpmnElement="ServiceTask_ReserveVideoRoom">
+        <dc:Bounds x="1420" y="770" width="190" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_PrepareSessionJoin_di" bpmnElement="Gateway_PrepareSessionJoin">
+        <dc:Bounds x="1660" y="345" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_ConsultationTime_di" bpmnElement="IntermediateCatchEvent_ConsultationTime">
+        <dc:Bounds x="1760" y="352" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask_ConductConsultation_di" bpmnElement="UserTask_ConductConsultation">
+        <dc:Bounds x="1840" y="515" width="180" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask_DocumentConclusion_di" bpmnElement="UserTask_DocumentConclusion">
+        <dc:Bounds x="2070" y="515" width="180" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_PublishResultsFork_di" bpmnElement="Gateway_PublishResultsFork">
+        <dc:Bounds x="2300" y="705" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_SaveProtocolToEHR_di" bpmnElement="ServiceTask_SaveProtocolToEHR">
+        <dc:Bounds x="2400" y="650" width="190" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_SendConclusion_di" bpmnElement="ServiceTask_SendConclusion">
+        <dc:Bounds x="2400" y="730" width="190" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_CloseCase_di" bpmnElement="ServiceTask_CloseCase">
+        <dc:Bounds x="2400" y="330" width="190" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_PublishResultsJoin_di" bpmnElement="Gateway_PublishResultsJoin">
+        <dc:Bounds x="2640" y="705" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ReceiveConclusion_di" bpmnElement="Task_ReceiveConclusion">
+        <dc:Bounds x="2740" y="130" width="170" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_ConclusionAvailable_di" bpmnElement="EndEvent_ConclusionAvailable">
+        <dc:Bounds x="2960" y="152" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_InformRejection_di" bpmnElement="Task_InformRejection">
+        <dc:Bounds x="850" y="330" width="190" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_RequestRejected_di" bpmnElement="EndEvent_RequestRejected">
+        <dc:Bounds x="1112" y="430" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_Start_To_SubmitRequest_di" bpmnElement="Flow_Start_To_SubmitRequest">
+        <di:waypoint x="241" y="170" />
+        <di:waypoint x="280" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_SubmitRequest_To_ValidateRequest_di" bpmnElement="Flow_SubmitRequest_To_ValidateRequest">
+        <di:waypoint x="450" y="170" />
+        <di:waypoint x="475" y="170" />
+        <di:waypoint x="475" y="370" />
+        <di:waypoint x="500" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ValidateRequest_To_RequestAccepted_di" bpmnElement="Flow_ValidateRequest_To_RequestAccepted">
+        <di:waypoint x="690" y="370" />
+        <di:waypoint x="740" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_RequestAccepted_To_SelectSlot_di" bpmnElement="Flow_RequestAccepted_To_SelectSlot">
+        <di:waypoint x="765" y="345" />
+        <di:waypoint x="765" y="170" />
+        <di:waypoint x="850" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_RequestRejected_To_InformRejection_di" bpmnElement="Flow_RequestRejected_To_InformRejection">
+        <di:waypoint x="790" y="370" />
+        <di:waypoint x="850" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_SelectSlot_To_CreateCase_di" bpmnElement="Flow_SelectSlot_To_CreateCase">
+        <di:waypoint x="1020" y="170" />
+        <di:waypoint x="1050" y="170" />
+        <di:waypoint x="1050" y="370" />
+        <di:waypoint x="1080" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_CreateCase_To_PrepareSessionFork_di" bpmnElement="Flow_CreateCase_To_PrepareSessionFork">
+        <di:waypoint x="1270" y="370" />
+        <di:waypoint x="1320" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PrepareFork_To_Notifications_di" bpmnElement="Flow_PrepareFork_To_Notifications">
+        <di:waypoint x="1370" y="370" />
+        <di:waypoint x="1420" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PrepareFork_To_UpdateScheduleAndEHR_di" bpmnElement="Flow_PrepareFork_To_UpdateScheduleAndEHR">
+        <di:waypoint x="1345" y="395" />
+        <di:waypoint x="1345" y="690" />
+        <di:waypoint x="1420" y="690" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PrepareFork_To_ReserveVideoRoom_di" bpmnElement="Flow_PrepareFork_To_ReserveVideoRoom">
+        <di:waypoint x="1345" y="395" />
+        <di:waypoint x="1345" y="810" />
+        <di:waypoint x="1420" y="810" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Notifications_To_PrepareJoin_di" bpmnElement="Flow_Notifications_To_PrepareJoin">
+        <di:waypoint x="1610" y="370" />
+        <di:waypoint x="1660" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_UpdateScheduleAndEHR_To_PrepareJoin_di" bpmnElement="Flow_UpdateScheduleAndEHR_To_PrepareJoin">
+        <di:waypoint x="1610" y="690" />
+        <di:waypoint x="1685" y="690" />
+        <di:waypoint x="1685" y="395" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ReserveVideoRoom_To_PrepareJoin_di" bpmnElement="Flow_ReserveVideoRoom_To_PrepareJoin">
+        <di:waypoint x="1610" y="810" />
+        <di:waypoint x="1685" y="810" />
+        <di:waypoint x="1685" y="395" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PrepareJoin_To_ConsultationTime_di" bpmnElement="Flow_PrepareJoin_To_ConsultationTime">
+        <di:waypoint x="1710" y="370" />
+        <di:waypoint x="1760" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ConsultationTime_To_ConductConsultation_di" bpmnElement="Flow_ConsultationTime_To_ConductConsultation">
+        <di:waypoint x="1796" y="370" />
+        <di:waypoint x="1818" y="370" />
+        <di:waypoint x="1818" y="555" />
+        <di:waypoint x="1840" y="555" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ConductConsultation_To_DocumentConclusion_di" bpmnElement="Flow_ConductConsultation_To_DocumentConclusion">
+        <di:waypoint x="2020" y="555" />
+        <di:waypoint x="2070" y="555" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_DocumentConclusion_To_PublishResultsFork_di" bpmnElement="Flow_DocumentConclusion_To_PublishResultsFork">
+        <di:waypoint x="2250" y="555" />
+        <di:waypoint x="2325" y="555" />
+        <di:waypoint x="2325" y="705" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PublishFork_To_SaveProtocolToEHR_di" bpmnElement="Flow_PublishFork_To_SaveProtocolToEHR">
+        <di:waypoint x="2350" y="730" />
+        <di:waypoint x="2375" y="730" />
+        <di:waypoint x="2375" y="690" />
+        <di:waypoint x="2400" y="690" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PublishFork_To_SendConclusion_di" bpmnElement="Flow_PublishFork_To_SendConclusion">
+        <di:waypoint x="2350" y="730" />
+        <di:waypoint x="2375" y="730" />
+        <di:waypoint x="2375" y="770" />
+        <di:waypoint x="2400" y="770" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PublishFork_To_CloseCase_di" bpmnElement="Flow_PublishFork_To_CloseCase">
+        <di:waypoint x="2325" y="705" />
+        <di:waypoint x="2325" y="370" />
+        <di:waypoint x="2400" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_SaveProtocolToEHR_To_PublishJoin_di" bpmnElement="Flow_SaveProtocolToEHR_To_PublishJoin">
+        <di:waypoint x="2590" y="690" />
+        <di:waypoint x="2615" y="690" />
+        <di:waypoint x="2615" y="730" />
+        <di:waypoint x="2640" y="730" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_SendConclusion_To_PublishJoin_di" bpmnElement="Flow_SendConclusion_To_PublishJoin">
+        <di:waypoint x="2590" y="770" />
+        <di:waypoint x="2615" y="770" />
+        <di:waypoint x="2615" y="730" />
+        <di:waypoint x="2640" y="730" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_CloseCase_To_PublishJoin_di" bpmnElement="Flow_CloseCase_To_PublishJoin">
+        <di:waypoint x="2590" y="370" />
+        <di:waypoint x="2665" y="370" />
+        <di:waypoint x="2665" y="705" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PublishJoin_To_ReceiveConclusion_di" bpmnElement="Flow_PublishJoin_To_ReceiveConclusion">
+        <di:waypoint x="2690" y="730" />
+        <di:waypoint x="2715" y="730" />
+        <di:waypoint x="2715" y="170" />
+        <di:waypoint x="2740" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ReceiveConclusion_To_End_di" bpmnElement="Flow_ReceiveConclusion_To_End">
+        <di:waypoint x="2910" y="170" />
+        <di:waypoint x="2960" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_InformRejection_To_RequestRejectedEnd_di" bpmnElement="Flow_InformRejection_To_RequestRejectedEnd">
+        <di:waypoint x="1040" y="370" />
+        <di:waypoint x="1130" y="370" />
+        <di:waypoint x="1130" y="430" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
