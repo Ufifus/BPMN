@@ -200,19 +200,19 @@
   <bpmndi:BPMNDiagram id="BPMNDiagram_TelemedicineConsultationL1">
     <bpmndi:BPMNPlane id="BPMNPlane_TelemedicineConsultationL1" bpmnElement="Collaboration_TelemedicineConsultationL1">
       <bpmndi:BPMNShape id="Participant_MIS_di" bpmnElement="Participant_MIS" isHorizontal="true">
-        <dc:Bounds x="120" y="80" width="2380" height="720" />
+        <dc:Bounds x="120" y="80" width="2940" height="820" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_Patient_di" bpmnElement="Lane_Patient" isHorizontal="true">
-        <dc:Bounds x="150" y="80" width="2350" height="180" />
+        <dc:Bounds x="150" y="80" width="2910" height="180" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_TelemedicineModule_di" bpmnElement="Lane_TelemedicineModule" isHorizontal="true">
-        <dc:Bounds x="150" y="260" width="2350" height="220" />
+        <dc:Bounds x="150" y="260" width="2910" height="220" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_Doctor_di" bpmnElement="Lane_Doctor" isHorizontal="true">
-        <dc:Bounds x="150" y="480" width="2350" height="150" />
+        <dc:Bounds x="150" y="480" width="2910" height="150" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_Integrations_di" bpmnElement="Lane_Integrations" isHorizontal="true">
-        <dc:Bounds x="150" y="630" width="2350" height="170" />
+        <dc:Bounds x="150" y="630" width="2910" height="270" />
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNShape id="StartEvent_RequestConsultation_di" bpmnElement="StartEvent_RequestConsultation">
@@ -240,10 +240,10 @@
         <dc:Bounds x="1420" y="330" width="190" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_UpdateScheduleAndEHR_di" bpmnElement="ServiceTask_UpdateScheduleAndEHR">
-        <dc:Bounds x="1420" y="675" width="190" height="80" />
+        <dc:Bounds x="1420" y="650" width="190" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_ReserveVideoRoom_di" bpmnElement="ServiceTask_ReserveVideoRoom">
-        <dc:Bounds x="1420" y="545" width="190" height="80" />
+        <dc:Bounds x="1420" y="770" width="190" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_PrepareSessionJoin_di" bpmnElement="Gateway_PrepareSessionJoin">
         <dc:Bounds x="1660" y="345" width="50" height="50" />
@@ -258,19 +258,19 @@
         <dc:Bounds x="2070" y="515" width="180" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_PublishResultsFork_di" bpmnElement="Gateway_PublishResultsFork">
-        <dc:Bounds x="2300" y="690" width="50" height="50" />
+        <dc:Bounds x="2300" y="705" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_SaveProtocolToEHR_di" bpmnElement="ServiceTask_SaveProtocolToEHR">
-        <dc:Bounds x="2400" y="675" width="190" height="80" />
+        <dc:Bounds x="2400" y="650" width="190" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_SendConclusion_di" bpmnElement="ServiceTask_SendConclusion">
-        <dc:Bounds x="2400" y="130" width="190" height="80" />
+        <dc:Bounds x="2400" y="730" width="190" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_CloseCase_di" bpmnElement="ServiceTask_CloseCase">
         <dc:Bounds x="2400" y="330" width="190" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_PublishResultsJoin_di" bpmnElement="Gateway_PublishResultsJoin">
-        <dc:Bounds x="2640" y="690" width="50" height="50" />
+        <dc:Bounds x="2640" y="705" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_ReceiveConclusion_di" bpmnElement="Task_ReceiveConclusion">
         <dc:Bounds x="2740" y="130" width="170" height="80" />
@@ -282,7 +282,7 @@
         <dc:Bounds x="850" y="330" width="190" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_RequestRejected_di" bpmnElement="EndEvent_RequestRejected">
-        <dc:Bounds x="1112" y="452" width="36" height="36" />
+        <dc:Bounds x="1112" y="430" width="36" height="36" />
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNEdge id="Flow_Start_To_SubmitRequest_di" bpmnElement="Flow_Start_To_SubmitRequest">
@@ -324,26 +324,26 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_PrepareFork_To_UpdateScheduleAndEHR_di" bpmnElement="Flow_PrepareFork_To_UpdateScheduleAndEHR">
         <di:waypoint x="1345" y="395" />
-        <di:waypoint x="1345" y="715" />
-        <di:waypoint x="1420" y="715" />
+        <di:waypoint x="1345" y="690" />
+        <di:waypoint x="1420" y="690" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_PrepareFork_To_ReserveVideoRoom_di" bpmnElement="Flow_PrepareFork_To_ReserveVideoRoom">
         <di:waypoint x="1345" y="395" />
-        <di:waypoint x="1345" y="585" />
-        <di:waypoint x="1420" y="585" />
+        <di:waypoint x="1345" y="810" />
+        <di:waypoint x="1420" y="810" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Notifications_To_PrepareJoin_di" bpmnElement="Flow_Notifications_To_PrepareJoin">
         <di:waypoint x="1610" y="370" />
         <di:waypoint x="1660" y="370" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_UpdateScheduleAndEHR_To_PrepareJoin_di" bpmnElement="Flow_UpdateScheduleAndEHR_To_PrepareJoin">
-        <di:waypoint x="1610" y="715" />
-        <di:waypoint x="1685" y="715" />
+        <di:waypoint x="1610" y="690" />
+        <di:waypoint x="1685" y="690" />
         <di:waypoint x="1685" y="395" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_ReserveVideoRoom_To_PrepareJoin_di" bpmnElement="Flow_ReserveVideoRoom_To_PrepareJoin">
-        <di:waypoint x="1610" y="585" />
-        <di:waypoint x="1685" y="585" />
+        <di:waypoint x="1610" y="810" />
+        <di:waypoint x="1685" y="810" />
         <di:waypoint x="1685" y="395" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_PrepareJoin_To_ConsultationTime_di" bpmnElement="Flow_PrepareJoin_To_ConsultationTime">
@@ -363,39 +363,45 @@
       <bpmndi:BPMNEdge id="Flow_DocumentConclusion_To_PublishResultsFork_di" bpmnElement="Flow_DocumentConclusion_To_PublishResultsFork">
         <di:waypoint x="2250" y="555" />
         <di:waypoint x="2325" y="555" />
-        <di:waypoint x="2325" y="690" />
+        <di:waypoint x="2325" y="705" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_PublishFork_To_SaveProtocolToEHR_di" bpmnElement="Flow_PublishFork_To_SaveProtocolToEHR">
-        <di:waypoint x="2350" y="715" />
-        <di:waypoint x="2400" y="715" />
+        <di:waypoint x="2350" y="730" />
+        <di:waypoint x="2375" y="730" />
+        <di:waypoint x="2375" y="690" />
+        <di:waypoint x="2400" y="690" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_PublishFork_To_SendConclusion_di" bpmnElement="Flow_PublishFork_To_SendConclusion">
-        <di:waypoint x="2325" y="690" />
-        <di:waypoint x="2325" y="170" />
-        <di:waypoint x="2400" y="170" />
+        <di:waypoint x="2350" y="730" />
+        <di:waypoint x="2375" y="730" />
+        <di:waypoint x="2375" y="770" />
+        <di:waypoint x="2400" y="770" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_PublishFork_To_CloseCase_di" bpmnElement="Flow_PublishFork_To_CloseCase">
-        <di:waypoint x="2325" y="690" />
+        <di:waypoint x="2325" y="705" />
         <di:waypoint x="2325" y="370" />
         <di:waypoint x="2400" y="370" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_SaveProtocolToEHR_To_PublishJoin_di" bpmnElement="Flow_SaveProtocolToEHR_To_PublishJoin">
-        <di:waypoint x="2590" y="715" />
-        <di:waypoint x="2640" y="715" />
+        <di:waypoint x="2590" y="690" />
+        <di:waypoint x="2615" y="690" />
+        <di:waypoint x="2615" y="730" />
+        <di:waypoint x="2640" y="730" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_SendConclusion_To_PublishJoin_di" bpmnElement="Flow_SendConclusion_To_PublishJoin">
-        <di:waypoint x="2590" y="170" />
-        <di:waypoint x="2665" y="170" />
-        <di:waypoint x="2665" y="690" />
+        <di:waypoint x="2590" y="770" />
+        <di:waypoint x="2615" y="770" />
+        <di:waypoint x="2615" y="730" />
+        <di:waypoint x="2640" y="730" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_CloseCase_To_PublishJoin_di" bpmnElement="Flow_CloseCase_To_PublishJoin">
         <di:waypoint x="2590" y="370" />
         <di:waypoint x="2665" y="370" />
-        <di:waypoint x="2665" y="690" />
+        <di:waypoint x="2665" y="705" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_PublishJoin_To_ReceiveConclusion_di" bpmnElement="Flow_PublishJoin_To_ReceiveConclusion">
-        <di:waypoint x="2690" y="715" />
-        <di:waypoint x="2715" y="715" />
+        <di:waypoint x="2690" y="730" />
+        <di:waypoint x="2715" y="730" />
         <di:waypoint x="2715" y="170" />
         <di:waypoint x="2740" y="170" />
       </bpmndi:BPMNEdge>
@@ -406,7 +412,7 @@
       <bpmndi:BPMNEdge id="Flow_InformRejection_To_RequestRejectedEnd_di" bpmnElement="Flow_InformRejection_To_RequestRejectedEnd">
         <di:waypoint x="1040" y="370" />
         <di:waypoint x="1130" y="370" />
-        <di:waypoint x="1130" y="452" />
+        <di:waypoint x="1130" y="430" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
